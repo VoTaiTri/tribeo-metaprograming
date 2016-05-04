@@ -49,6 +49,13 @@ Có một số định nghĩa cần nhớ trong **Metaprograming**
   end
 ```
 
+=> Kết quả là:
+```ruby
+	Hello
+	Hello
+	Hello
+```
+
 => `Không phải định nghĩa 3 class với tên giống nhau`
 
 - vd2: định nghĩa 2 `class` cùng tên sau
@@ -75,6 +82,10 @@ obj.y # => "y"
 
 => Bạn có định nghĩa 1 `class` mới trùng tên với các `class` sẵn có.
 
+#### What’s in an Object
+
+Hãy bắt đầu với những thứ cơ bản : `objects` và `classes`.
+
 ```ruby
 class MyClass
   def my_method
@@ -87,17 +98,91 @@ obj = MyClass.new
 obj.class # => MyClass
 ```
 
+Hãy nhìn vào đối tượng `obj` để xem nó có những gì :
+
 #### 1. Instance variables
+- `Quan trọng nhất`
 
 - `objects` chứa `instance variables`
-  - `Object#instance_variables()`
+  - Có thể xem danh sách các `instance variables` bằng lệnh `Object#instance_variables()`
 
 ```ruby
 obj.instance_variables() # => [:@v]
 ```
+
+- Không giống như `Java` hay là ngôn ngữ tĩnh khác, trong `Ruby` thì không có kết nối giữa object (của class) với `instance variable` của nó.
 
 - Có thể hiểu `tên` và `giá trị` của `instance variables` giống như là `key` và `value` của 1 `HASH`.
 
 => cả `tên` và `giá trị` có thể khác nhau với mỗi `object`
 
 #### 2. Methods
+
+- Xem danh sách các `method` của `object` bằng lệnh `Object#methods()`.
+
+- Hầu hết các kế thừa một số lượng các `method` từ `Object` => để lọc có thể dùng `.grep()`
+
+- `Các object mà chia sẻ cùng class thì cũng chia sẻ cùng các method` => `phải lưu method trong class chứ không phải trong object`
+
+=> Nên gọi `my_method` ở trên là `nstance method` (chứ không phải chỉ mỗi `method`) thì chuẩn hơn.
+
+- `Một instance variable của object sống trong chính object đó còn các method của object thì lại sống trong class của object đó`
+
+=> Các object của cùng class có thể chia sẻ `method` chứ không thể chia sẻ được `instance method`.
+
+#### Classes Revisited.
+
+- `“Classes themselves are nothing but objects.”`
+
+- Vì `class` là 1 `object` nên mọi thứ áp dụng được cho `object` thì cũng áp dụng được cho `class`. Giống như bất cứ object nào, class cũng có lớp của nó, và đó là lớp `Class`
+
+```ruby
+	"hello".class
+	String.class
+	# => String
+	# => Class
+```
+
+- Giống như `object` thì `class` cũng có các `method`. `method` của một `object` cũng chính là `instance method` của `class` của `object` đó => các `method` của 1 `class` cũng chính là `instance method` của lớp `Class`
+
+```ruby
+	inherited = false
+	Class.instance_methods(inherited) # => [:superclass, :allocate, :new]
+
+	String.superclass	# => Object
+	Object.superclass	# => BasicObject
+	BasicObject.superclass	# => nil
+	Class.superclass	# => Module
+	Module.superclass	# => Object
+```
+
+- Cây kế thừa trong `Ruby` : `BasicObject` --> `Object` --> ...
+
+- `BasicObject` là gốc trong cây kế thừa.
+
+#### Constants
+
+- `scope` của `constant` tuẩn theo quy tắc đặc biệt riêng của mình chứ không giống như `scope` của `variable`.
+
+- ví dụ :
+
+```ruby
+module MyModule
+	MyConstant = 'Outer constant'
+
+	class MyClass
+		MyConstant = 'Inner constant'
+	end
+end
+```
+
+- Tất cả các `constant` trong chương trình được sắp xếp trong 1 cây tương tự như hệ thống file vậy => `module` và `class` là các thư mục và `constant` là các file.
+
+- Có thể có các `constant` có cùng tên, miễn là nó ở các thư mục khác nhau => có thể truy cập tới 1 `constant` qua đường dẫn của nó (giống như truy cập file).
+
+=> Bạn có thể viết : `MyModule::MyClass::MyConstant`
+
+- Bạn có thể sử dụng `module` để tổ chức `constant`, xem vd : 
+
+#### The Rake Example
+
