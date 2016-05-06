@@ -182,7 +182,94 @@ end
 
 => Bạn có thể viết : `MyModule::MyClass::MyConstant`
 
-- Bạn có thể sử dụng `module` để tổ chức `constant`, xem vd : 
+- Bạn có thể sử dụng `module` để tổ chức `constant`, xem vd :
 
-#### The Rake Example
+- `constant` được xác định duy nhất bằng `path` của chúng. => sử dụng dấu `::` => `A::B`
+
+```ruby
+module M
+  Y = 'another constant'
+
+  class C
+    X = 'a constant'
+    ::M::Y # => "another constant"
+  end
+
+  C::X # => "a constant"
+end
+
+M::C::X # => "a constant"
+```
+
+- lớp `Module` cũng cung cấp 1 `instance method` và một `class method` nhưng mà cả hai đều được gọi bằng method `.constants()`.
+  - `module#constants()` => trả về tất cả `constant` trong phạm vi hiện tại.
+  - `module.constants()` => trả về tát cả `constant` cấp cao nhất trong chương trình hiện tại, bao gồm cả tên lớp.
+
+```ruby
+M.constants # => [:C, :Y]
+Module.constants[0..1] # => [:Object, :Module]
+```
+
+- Nếu muốn xem `path` => `module.nesting()`
+
+```ruby
+module M
+  class C
+    module M2
+      Module.nesting # => [M::C::M2, M::C, M]
+    end
+  end
+end
+```
+
+#### What Happens When You Call a Method?
+
+=> `Ruby` sẽ làm 2 việc :
+
+- Tìm kiếm `method`, đáo là 1 quá trình gọi là `method lookup`
+
+- Thực hiện `method`, để thực hiện thì `Ruby` cần vài thứ gọi là `self`
+
+#### Method Lookup
+
+```ruby
+class MyClass
+  def my_method; 'my_method()' ; end
+end
+
+class MySubclass < MyClass
+end
+
+obj = MySubclass.new
+obj.my_method() # => "my_method()"
+```
+
+=> Tìm `method` thì sẽ tìm trong `class` của `object` đó, nếu không có thì lại tiếp tục tìm trong các `class` cha theo thứ tự.
+
+- Để xem chuỗi cây kế thừa của một `class` thì ta có method `ancestors()`
+
+```ruby
+MySubclass.ancestors # => [MySubclass, MyClass, Object, Kernel, BasicObject]
+```
+
+#### Modules and Lookup
+
+=> chuỗi cây kế thừa của một `class` lại bao gồm có cả `module` (`Kernel`)
+
+```ruby
+module M
+  def my_method
+    'M#my_method()'
+  end
+end
+
+class C
+  include M
+end
+
+class D < C; end
+
+D.new.my_method() # => "M#my_method()"
+D.ancestors # => [D, C, M, Object, Kernel, BasicObject]
+```
 
